@@ -87,13 +87,12 @@ const int right_ang = 28;
 // в миллисекундах.
 const int time_90 = 390;
 const int time_180 = 750*1.5;
-const int time_10cm = 500*1.5;
 
 // задержка по времени поворота головы
 const int time_head_turn = 700;
 
-//Дистанция по которой робот принимает какие-либо действия
-const int time_dist_action = 20;
+//Дистанция до объекта, по которой робот принимает какие-либо действия
+const int time_dist_action = 20*2;
 
 void setup()
 {
@@ -108,94 +107,136 @@ void setup()
 
   //Проверка дальномера
   Serial.begin(9600); // start the serial port
-
 }
 // Основная программа.
 void loop()
 {
- _stop();
+  //  _stop();
 
- // Создаем переменные для хранения трех дистанций - слева, впереди, справа.
- int Dist_left, Dist_front, Dist_right;
- // Поворачиваем голову налево.
- neck.write(left_ang);
- // Ждем, т. к. поворот занимает небольшое время.
- delay(time_head_turn);
- // Записываем расстояние до препятствия слева.
- Dist_left = Sonar(400);
-  Serial.print("Dist_left="); // оформляем вывод.
-  Serial.print(Dist_left); // выводим дистанцию.
-  Serial.println(" cm."); // оформляем вывод.
+  // Создаем переменные для хранения трех дистанций - слева, впереди, справа.
+  int Dist_left, Dist_front, Dist_right;
 
- // Поворачиваем голову прямо вперед.
- neck.write(front_ang);
- // Ждем, т. к. поворот занимает небольшое время.
- delay(time_head_turn);
- // Записываем расстояние до препятствия впереди.
- Dist_front = Sonar(400);
-  Serial.print("Dist_front="); // оформляем вывод.
-  Serial.print(Dist_front); // выводим дистанцию.
-  Serial.println(" cm."); // оформляем вывод.
+  // Поворачиваем голову прямо вперед.
+  neck.write(front_ang);
+  // Ждем, т. к. поворот занимает небольшое время.
+  delay(200);
+  // Записываем расстояние до препятствия впереди.
+  Dist_front = Sonar(400);
+  Serial.print("Dist_front=");
+  Serial.print(Dist_front);
+  Serial.println(" cm.");
 
- // Поворачиваем голову направо.
- neck.write(right_ang);
- // Ждем, т. к. поворот занимает небольшое время.
- delay(time_head_turn); 
- // Записываем расстояние до препятствия впереди.
- Dist_right = Sonar(400);
-  Serial.print("Dist_right="); // оформляем вывод.
-  Serial.print(Dist_right); // выводим дистанцию.
-  Serial.println(" cm."); // оформляем вывод.
-
- neck.write(left_ang);
- // Если расстояние до препятствия слева наибольшее
- if ((Dist_left > Dist_front) && (Dist_left > Dist_right))
- {
-   if ((Dist_left < time_dist_action) || (Dist_left = time_dist_action))
-      {
-        // left(); // поворачиваем налево 0,5 секунд.
-        right();
-        delay(time_90);
-        Serial.println("лево > прямо и лево > право. Расстояние меньше 20. Поворачиваю на лево!");
-      }
-      else if (Dist_left > time_dist_action)
-      {
-        forward(); // едем вперед 0,5 секунды.
-        delay(time_10cm);
-        Serial.println("лево > прямо и лево > право. Еду вперёд!");
-      }
- }
- else
- {
-  if (Dist_right > Dist_front)
+  if ((Dist_front < time_dist_action) || (Dist_front == time_dist_action)) //Едем вперёд пока дистанция не будет меньше 20 см. Если меньше 20, то
   {
-    if ((Dist_right < time_dist_action) || (Dist_right = time_dist_action))
-      {
-        // right(); // поворачиваем направо 0,5 секунд.
-        left();
-        delay(time_90);
-        Serial.println("право > прямо. Расстояние меньше 20. Поворачиваю на право!");
-      } else if (Dist_right > time_dist_action)
-      {
-        forward(); // едем вперед 0,5 секунды.
-        delay(time_10cm);
-        Serial.println("право > прямо. Еду вперёд!");
-      }
+    _stop();
+    // Поворачиваем голову налево.
+    neck.write(left_ang);
+    // Ждем, т. к. поворот занимает небольшое время.
+    delay(time_head_turn);
+    // Записываем расстояние до препятствия слева.
+    Dist_left = Sonar(400);
+    Serial.print("Dist_left=");
+    Serial.print(Dist_left);
+    Serial.println(" cm.");
+
+    // Поворачиваем голову прямо вперед.
+    neck.write(front_ang);
+    // Ждем, т. к. поворот занимает небольшое время.
+    delay(200);
+    // Записываем расстояние до препятствия впереди.
+    Dist_front = Sonar(400);
+    Serial.print("Dist_front=");
+    Serial.print(Dist_front);
+    Serial.println(" cm.");
+
+    // Поворачиваем голову направо.
+    neck.write(right_ang);
+    // Ждем, т. к. поворот занимает небольшое время.
+    delay(time_head_turn); 
+    // Записываем расстояние до препятствия впереди.
+    Dist_right = Sonar(400);
+    Serial.print("Dist_right=");
+    Serial.print(Dist_right);
+    Serial.println(" cm.");
+
+    neck.write(front_ang);
+
+    // Если расстояние до препятствия слева наибольшее
+
+    if ((Dist_left < time_dist_action) && (Dist_front < time_dist_action) && (Dist_right < time_dist_action))
+    {
+      // right(); // разворачиваемся.
+      left();
+      delay(time_180);
+      Serial.println("Расстояние меньше 40. Разворачиваюсь!");
     }
     else
     {
-      if ((Dist_front < time_dist_action) || (Dist_front = time_dist_action))
+      if ((Dist_left > Dist_front) && (Dist_left > Dist_right))
       {
-        // right(); // разворачиваемся.
+
+        Serial.print("Dist_left=");
+        Serial.print(Dist_left);
+        Serial.print(" cm.");
+        Serial.print("Dist_front=");
+        Serial.print(Dist_front);
+        Serial.print(" cm.");
+        Serial.print("Dist_right=");
+        Serial.print(Dist_right);
+        Serial.println(" cm.");
+
+        
+        Serial.print(time_dist_action);
+        Serial.println(">. Поворачиваю на лево!");
+        // left(); // поворачиваем налево 0,5 секунд.
+        right();
+        delay(time_90);
+
+        Serial.print("лево > прямо и лево > право. Расстояние меньше <");
+        Serial.print(time_dist_action);
+        Serial.println(">. Поворачиваю на лево!");
+        Serial.println("<------------------------------------------------------->");
+
+      } else if (Dist_right > Dist_front)
+      {
+        Serial.print("Dist_left=");
+        Serial.print(Dist_left);
+        Serial.print(" cm.");
+        Serial.print("Dist_front=");
+        Serial.print(Dist_front);
+        Serial.print(" cm.");
+        Serial.print("Dist_right=");
+        Serial.print(Dist_right);
+        Serial.println(" cm.");
+
+
+        // right(); // поворачиваем направо 0,5 секунд.
         left();
-        delay(time_180);
-        Serial.println("прямо > право и прямо > лево. Расстояние меньше 20. Разворачиваюсь!");
-      } else if (Dist_front > time_dist_action)
-      {
-        forward(); // едем вперед 0,5 секунды.
-        delay(time_10cm);
-        Serial.println("прямо > право и прямо > лево. Еду вперёд!");
+        delay(time_90);
+
+        Serial.print("право > прямо. Расстояние меньше <");
+        Serial.print(time_dist_action);
+        Serial.println(">. Поворачиваю на право!");
+        Serial.println("<------------------------------------------------------->");
       }
     }
+  }
+  else
+  {
+    Serial.print("Dist_left=");
+    Serial.print(Dist_left);
+    Serial.print(" cm.");
+    Serial.print("Dist_front=");
+    Serial.print(Dist_front);
+    Serial.print(" cm.");
+    Serial.print("Dist_right=");
+    Serial.print(Dist_right);
+    Serial.println(" cm.");
+
+
+    forward(); // едем вперед 0,5 секунды.
+
+    Serial.println("Еду вперёд до упора!");
+    Serial.println("<------------------------------------------------------->");
   }
 }
